@@ -22,6 +22,7 @@ parser.add_argument('-T', '--time_fmt', choices=['l','e','u'], default='l', help
 output_fmt = parser.add_mutually_exclusive_group()
 output_fmt.add_argument('-l', action='store_true', help='detailed listing')
 output_fmt.add_argument('-s', action='store_true', help='display file paths only')
+output_fmt.add_argument('-g', action='store_true', help='gource format')
 
 sort_type = parser.add_mutually_exclusive_group()
 sort_type.add_argument('-t', choices=['m','a','c'], help='Sort by m/a/c time')
@@ -153,5 +154,16 @@ def fileinfo_str(f):
 
 if __name__ == '__main__':
     mbdb = process_mbdb_file(args.file)
+    if args.g:
+        # Gource custom log format should look like:
+        # 1424658814|USN|M|/Users/user1/AppData/Local/Temp/logEF94.txt
+        g_set = set()
+        for offset in sorting:
+            g_set.add("{}|User|{}|/{}".format(mbdb[offset]['mtime'], 'M', mbdb[offset]['filename']))
+            g_set.add("{}|User|{}|/{}".format(mbdb[offset]['atime'], 'M', mbdb[offset]['filename']))
+            g_set.add("{}|User|{}|/{}".format(mbdb[offset]['ctime'], 'M', mbdb[offset]['filename']))
+        for entry in sorted(g_set):
+            print(entry)
+        quit()
     for offset in sorted(sorting, key=sorting.get, reverse=args.r):
         print fileinfo_str(mbdb[offset])
